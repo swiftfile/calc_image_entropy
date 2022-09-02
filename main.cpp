@@ -1,5 +1,6 @@
 #include <iostream>
 #include <opencv4/opencv2/opencv.hpp>
+#include <chrono>
 
 
 int main() {
@@ -25,6 +26,7 @@ int main() {
     //binary_entropy(histogram)
 
     //画像の領域分割(参照のみで可
+    auto start_time = std::chrono::system_clock::now();
     uint vertial_cut_num = 6;//縦方向の切る回数
     uint horizontal_cut_num = 6;//横方向の切る回数
 
@@ -52,7 +54,6 @@ int main() {
     }
 
     std::cout << "cut image num is " << rois.size() << std::endl;
-
 
 
     // calc binary binary_entropy
@@ -85,6 +86,9 @@ int main() {
         binary_entropies.emplace_back(binary_entropy);
     }
 
+    auto end_time = std::chrono::system_clock::now();
+    double elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+    std::cout << "elapsed time is " << elapsed_time << "[ms]" << std::endl;
 
     for (int i = 0; i < rois.size(); i++) {
         std::ostringstream oss;
