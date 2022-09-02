@@ -10,7 +10,7 @@ include_directories(
 )
 
 add_executable(entropy
-        main.cpp
+        entropy/main.cpp
         )
 
 target_link_libraries(

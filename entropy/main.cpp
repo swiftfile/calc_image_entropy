@@ -85,6 +85,7 @@ int main() {
         binary_entropy = (prob_of_zero * log2(prob_of_zero) + prob_of_nonzero * log2(prob_of_nonzero)) * (-1);
         binary_entropies.emplace_back(binary_entropy);
     }
+    /// calc binary binary_entropy
 
     auto end_time = std::chrono::system_clock::now();
     double elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
