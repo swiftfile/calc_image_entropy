@@ -12,8 +12,14 @@ include_directories(
 add_executable(entropy
         entropy/main.cpp
         )
+add_executable(fft
+        fft/main.cpp)
 
 target_link_libraries(
         entropy
+        ${OpenCV_LIBRARIES}
+)
+target_link_libraries(
+        fft
         ${OpenCV_LIBRARIES}
 )
