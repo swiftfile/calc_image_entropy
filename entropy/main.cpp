@@ -94,8 +94,8 @@ int main() {
     for (int i = 0; i < rois.size(); i++) {
         std::ostringstream oss;
         oss << std::setfill('0') << std::setw(3) << i;
-        cv::imwrite("../roi_" + oss.str() + ".png", rois.at(i));
-        std::cout << "../roi_" + oss.str() + ".png is writed! binary_entropy is" << binary_entropies.at(i) << std::endl;
+        cv::imwrite("../outputs/entropy/roi_" + oss.str() + ".png", rois.at(i));
+        std::cout << "../outputs/entropy/roi_" + oss.str() + ".png is writed! binary_entropy is" << binary_entropies.at(i) << std::endl;
     }
 
 
