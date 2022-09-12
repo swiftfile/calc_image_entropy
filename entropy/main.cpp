@@ -27,16 +27,16 @@ int main() {
 
     //画像の領域分割(参照のみで可
     auto start_time = std::chrono::system_clock::now();
-    uint vertial_cut_num = 6;//縦方向の切る回数
+    uint vertical_cut_num = 6;//縦方向の切る回数
     uint horizontal_cut_num = 6;//横方向の切る回数
 
     std::vector<cv::Point> edge_points;
     cv::Point p;
-    int cut_width = orig_image.cols / vertial_cut_num;
-    int cut_height = orig_image.rows / horizontal_cut_num;
-    std::cout << "orig_x" << orig_image.cols << "\t orig_y" << orig_image.rows << std::endl;
+    uint cut_width = orig_image.cols / vertical_cut_num;
+    uint cut_height = orig_image.rows / horizontal_cut_num;
+    std::cout << "orig_x " << orig_image.cols << "\t orig_y " << orig_image.rows << std::endl;
 
-    for (int i = 0; i < vertial_cut_num; i++) {//ちゃんと任意の切断数で動くようにする.
+    for (uint i = 0; i < vertical_cut_num; i++) {//ちゃんと任意の切断数で動くようにする.
         p = {i * cut_width, 0};
         edge_points.emplace_back(p);
     }
@@ -46,7 +46,7 @@ int main() {
 
     std::vector<cv::Mat> rois;
     for (int i = 0; i < horizontal_cut_num; ++i) {
-        for (int j = 0; j < vertial_cut_num; ++j) {
+        for (int j = 0; j < vertical_cut_num; ++j) {
             cv::Mat var_roi;
             var_roi = orig_image(cv::Rect(j * cut_width, i * cut_height, cut_width, cut_height));
             rois.emplace_back(var_roi);
@@ -82,22 +82,29 @@ int main() {
         prob_of_nonzero = (double) num_of_non_zero_pixels / rois.at(i).cols / rois.at(i).rows;
         std::cout << "ROI" << i << " prob zero  is " << prob_of_zero << "prob non zero is " << prob_of_nonzero
                   << std::endl;
-        binary_entropy = (prob_of_zero * log2(prob_of_zero) + prob_of_nonzero * log2(prob_of_nonzero)) * (-1);
+        if ((prob_of_nonzero != 0) & (prob_of_zero != 0)) {
+            binary_entropy = (prob_of_zero * log2(prob_of_zero) + prob_of_nonzero * log2(prob_of_nonzero)) * (-1);
+
+        } else {
+            binary_entropy = 0.0;
+        }
         binary_entropies.emplace_back(binary_entropy);
+
     }
     /// calc binary binary_entropy
 
     auto end_time = std::chrono::system_clock::now();
-    double elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-    std::cout << "elapsed time is " << elapsed_time << "[ms]" << std::endl;
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+
 
     for (int i = 0; i < rois.size(); i++) {
         std::ostringstream oss;
         oss << std::setfill('0') << std::setw(3) << i;
         cv::imwrite("../outputs/entropy/roi_" + oss.str() + ".png", rois.at(i));
-        std::cout << "../outputs/entropy/roi_" + oss.str() + ".png is writed! binary_entropy is" << binary_entropies.at(i) << std::endl;
+        std::cout << "../outputs/entropy/roi_" + oss.str() + ".png is writed! binary_entropy is"
+                  << binary_entropies.at(i) << std::endl;
     }
-
+    std::cout << "calc entropy time is " << elapsed_time << "[ms]" << std::endl;
 
 //    for (auto &prob: probabilities) {
 //        if (prob != 0) {
