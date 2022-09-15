@@ -14,6 +14,9 @@ add_executable(entropy
         )
 add_executable(fft
         fft/main.cpp)
+add_executable(dynamicfft
+        sample/dynamicfft/main.cpp
+        )
 
 target_link_libraries(
         entropy
@@ -21,5 +24,10 @@ target_link_libraries(
 )
 target_link_libraries(
         fft
+        ${OpenCV_LIBRARIES}
+)
+
+target_link_libraries(
+        dynamicfft
         ${OpenCV_LIBRARIES}
 )
