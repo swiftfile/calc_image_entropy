@@ -10,24 +10,10 @@ int main() {
         std::cout << "empty" << std::endl;
         return -1;
     }
-//    //binary_entropy(histogram)
-//    const int channels[] = {0};
-//    std::vector<uint> mono_plane;
-//    const float range[] = {0, 256};
-//    const float *ranges[] = {range};
-//    cv::Mat hist;
-//    const int bins = 256;
-//    const int hdims[] = {bins};
-//    const int ch_height = 256;
-//    const int ch_width = 256;
-////    cv::Mat hist_img(cv::Size(ch_width,ch_height),CV_8UC3,cv::Scalar::all(255));
-//    double max_val;
-//    cv::calcHist(&orig_image, 1, 0, cv::Mat(), hist, 1, hdims, ranges);
-    //binary_entropy(histogram)
 
     //画像の領域分割(参照のみで可
     auto start_time = std::chrono::system_clock::now();
-    uint vertical_cut_num = 6;//縦方向の切る回数
+    uint vertical_cut_num = 16;//縦方向の切る回数
     uint horizontal_cut_num = 6;//横方向の切る回数
 
     std::vector<cv::Point> edge_points;
@@ -36,22 +22,33 @@ int main() {
     uint cut_height = orig_image.rows / horizontal_cut_num;
     std::cout << "orig_x " << orig_image.cols << "\t orig_y " << orig_image.rows << std::endl;
 
-    for (uint i = 0; i < vertical_cut_num; i++) {//ちゃんと任意の切断数で動くようにする.
-        p = {i * cut_width, 0};
-        edge_points.emplace_back(p);
-    }
-    for (int i = 0; i < horizontal_cut_num; i++) {
-        edge_points.at(i).y = i * cut_height;
-    }
-
     std::vector<cv::Mat> rois;
-    for (int i = 0; i < horizontal_cut_num; ++i) {
-        for (int j = 0; j < vertical_cut_num; ++j) {
+    for (int i = 0; i < horizontal_cut_num + 1; ++i) {//ちゃんと任意の切断数で動くようにする.
+        for (int j = 0; j < vertical_cut_num + 1; ++j) {
+            p = {j * cut_width, i * cut_height}; //左上のはず
+            edge_points.emplace_back(p);
             cv::Mat var_roi;
-            var_roi = orig_image(cv::Rect(j * cut_width, i * cut_height, cut_width, cut_height));
+            if (((orig_image.cols - j * cut_width) < cut_width) &&
+                ((orig_image.rows - i * cut_height) < cut_height)) {
+                std::cout << "Pt.d" << std::endl;
+                var_roi = orig_image(
+                        cv::Rect(p.x, p.y, orig_image.cols - j * cut_width, orig_image.rows - i * cut_height));
+            } else if ((orig_image.cols - j * cut_width) < cut_width) {
+                std::cout << "Pt.c" << std::endl;
+                var_roi = orig_image(cv::Rect(p.x, p.y, orig_image.cols - j * cut_width, cut_height));
+            } else if ((orig_image.rows - i * cut_height) < cut_height) {
+                std::cout << "Pt.b" << std::endl;
+                var_roi = orig_image(
+                        cv::Rect(p.x, p.y, cut_width, orig_image.rows - i * cut_height));
+            } else {
+                std::cout << "Pt.a" << std::endl;
+                var_roi = orig_image(cv::Rect(p.x, p.y, cut_width, cut_height));
+            }
             rois.emplace_back(var_roi);
         }
+
     }
+
 
     std::cout << "cut image num is " << rois.size() << std::endl;
 
@@ -75,7 +72,6 @@ int main() {
         }
         std::cout << "rows " << rois.at(i).rows << std::endl;
         std::cout << "cols " << rois.at(i).cols << std::endl;
-        std::cout << "rows*cols is " << rois.at(i).rows * rois.at(i).cols << std::endl;
         std::cout << "ROI" << i << " zero num is " << num_of_zero_pixel << "non zero num is " << num_of_non_zero_pixels
                   << std::endl;
         prob_of_zero = (double) num_of_zero_pixel / rois.at(i).cols / rois.at(i).rows;
@@ -106,12 +102,26 @@ int main() {
     }
     std::cout << "calc entropy time is " << elapsed_time << "[ms]" << std::endl;
 
-//    for (auto &prob: probabilities) {
-//        if (prob != 0) {
-//            binary_entropy += prob * log2(prob);
-//        }
-//    }
-//    RCLCPP_WARN(get_logger(), "binary_entropy is %lf", binary_entropy);
+    //エントロピーのしきい値を超えたら色塗り
+    cv::Mat result_color_img = orig_image.clone();
+    cv::applyColorMap(result_color_img, result_color_img, cv::COLORMAP_JET);
+
+    cv::Mat result_bin_img(cv::Size(orig_image.cols, orig_image.rows), CV_8U, cv::Scalar(255)); //for mask？
+
+    std::cout << "edge_points.size() is" << edge_points.size() << std::endl;
+    std::cout << "binary_entropies.size() is" << binary_entropies.size() << std::endl;
+
+    for (int it = 0; it < binary_entropies.size(); ++it) {
+        if (binary_entropies.at(it) > 0.93) {
+            cv::rectangle(result_color_img, edge_points.at(it),
+                          cv::Point(edge_points.at(it).x + cut_width, edge_points.at(it).y + cut_height),
+                          cv::Scalar(255), 2);
+        }
+    }
+
+
+    cv::imwrite("../outputs/entropy/result_bin.png", result_bin_img);
+    cv::imwrite("../outputs/entropy/result_colored.png", result_color_img);
 
 
     std::cout << "Process end!" << std::endl;
