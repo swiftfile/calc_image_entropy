@@ -145,9 +145,9 @@ int main() {
 //    result_img.convertTo(result_img, CV_8UC1, 255);
     std::ostringstream oss;
 //        oss << std::setfill('0') << std::setw(3) << ite;
-//    cv::imwrite("../outputs/fft/result.png", result_img);
-    cv::imwrite("../outputs/fft/sobel.png", sobeled_img);
-//        cv::imwrite("../outputs/fft/result_roi_" + oss.str() + ".png", result_img);
+//    cv::imwrite("../outputs/fft-sobel/result.png", result_img);
+    cv::imwrite("../outputs/fft-sobel/sobel.png", sobeled_img);
+//        cv::imwrite("../outputs/fft-sobel/result_roi_" + oss.str() + ".png", result_img);
     std::cout << "img is saved!" << std::endl;
 //    }
 

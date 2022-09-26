@@ -12,10 +12,15 @@ include_directories(
 add_executable(entropy
         entropy/main.cpp
         )
-add_executable(fft
-        fft/main.cpp)
+add_executable(fft-sobel
+        fft-sobel/main.cpp
+        )
+
 add_executable(dynamicfft
         sample/dynamicfft/main.cpp
+        )
+add_executable(distance
+        distance/main.cpp
         )
 
 target_link_libraries(
@@ -23,11 +28,15 @@ target_link_libraries(
         ${OpenCV_LIBRARIES}
 )
 target_link_libraries(
-        fft
+        fft-sobel
         ${OpenCV_LIBRARIES}
 )
 
 target_link_libraries(
         dynamicfft
+        ${OpenCV_LIBRARIES}
+)
+target_link_libraries(
+        distance
         ${OpenCV_LIBRARIES}
 )
