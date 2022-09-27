@@ -92,39 +92,30 @@ int main() {
     inRange(binary_img, 0, 1, binary_img);
 
 
-//    Mat complex_img;
-//    createCompleximgForDft(orig_img, complex_img);
-//    cv::dft(complex_img, complex_img);
-//    cv::Mat magnitude_img;
-//    createFourierMagnitude(complex_img, magnitude_img);
-//
-//    idft(complex_img, complex_img);
-
     Mat sobeled_img;
     Sobel(binary_img, sobeled_img, CV_8UC1, 1, 0, 3);
     Sobel(sobeled_img, sobeled_img, CV_8UC1, 0, 1, 3);
 
     //仮で窓関数作ってみる
-//    Mat window_img(complex_img.rows,complex_img.cols,CV_32F);
-//    cv::bitwise_and()
 
     //sobelしたやつにモルフォロジーかける
-//    Mat molpho_img;
-//    uint erode_kernel = 3;
-//    Mat element = getStructuringElement(cv::MORPH_RECT, cv::Size(erode_kernel + 1, 2 * erode_kernel + 1),
-//                                        Point(erode_kernel, erode_kernel));
+    Mat morpho_img;
+    uint erode_kernel = 3;
+    Mat element = getStructuringElement(cv::MORPH_RECT, cv::Size(erode_kernel + 1, 2 * erode_kernel + 1),
+                                        Point(erode_kernel, erode_kernel));
 
-//    Mat idft_img;
+
+    cv::dilate(sobeled_img, morpho_img, element);
+    cv::erode(morpho_img, morpho_img, element);
 
     auto end_time = std::chrono::system_clock::now();
     double elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
     std::cout << "elapsed time is " << elapsed_time << "[us]" << std::endl;
     std::cout << "Process end!" << std::endl;
 
-//    createInverseFrourierImg(complex_img, orig_img.cols, orig_img.rows, idft_img);
-
     resize(orig_img, orig_img, cv::Size(), 3, 3);
     resize(sobeled_img, sobeled_img, cv::Size(), 3, 3);
+    resize(morpho_img, morpho_img, cv::Size(), 3, 3);
     namedWindow("original");
     imshow("original", orig_img);
 
@@ -134,8 +125,11 @@ int main() {
 //    imshow("IDFT", idft_img);
 //    namedWindow("binary");
 //    imshow("binary", binary_img);
+    std::cout << morpho_img.type() << std::endl;
     namedWindow("Sobel");
     imshow("Sobel", sobeled_img);
+    namedWindow("morpho");
+    imshow("morpho", morpho_img);
 
 //    resize(inversed_img, inversed_img, cv::Size(), 3, 3);
 //    imshow("Input", var_img);
